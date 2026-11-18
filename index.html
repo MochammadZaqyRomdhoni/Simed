@@ -1,0 +1,1544 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SiagaMedis TNI — Sistem Kesehatan Militer</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
+          colors: {
+            tni: {
+              dark: '#022C22',
+              primary: '#064E3B',
+              medium: '#114232',
+              light: '#ECFDF5',
+              gold: '#D97706',
+              goldLight: '#FEF3C7'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    /* Custom scrollbar & utility styling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    @keyframes pulse-ring {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.7); }
+      70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(220, 38, 38, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(220, 38, 38, 0); }
+    }
+    .sos-pulse {
+      animation: pulse-ring 2s infinite;
+    }
+    .fade-in {
+      animation: fadeIn 0.25s ease-out forwards;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-800 antialiased selection:bg-emerald-700 selection:text-white flex justify-center min-h-screen">
+
+  <!-- Mobile App Shell -->
+  <div id="app-shell" class="w-full max-w-[430px] min-h-screen sm:min-h-[844px] sm:h-[844px] bg-slate-50 sm:rounded-[38px] sm:shadow-2xl sm:border-[6px] sm:border-slate-800 flex flex-col overflow-hidden relative">
+
+    <!-- ========================================== -->
+    <!-- LOGIN SCREEN (AUTH VIEW)                   -->
+    <!-- ========================================== -->
+    <div id="login-screen" class="flex-1 flex flex-col justify-between bg-gradient-to-b from-[#022C22] via-[#064E3B] to-slate-50 overflow-y-auto no-scrollbar z-30">
+      <!-- Top Hero Banner -->
+      <div class="pt-10 pb-6 px-6 text-center text-white">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-400/60 flex items-center justify-center text-amber-400 mx-auto mb-3 shadow-lg">
+          <i data-lucide="shield-plus" class="w-9 h-9"></i>
+        </div>
+        <h1 class="text-2xl font-extrabold tracking-tight">SiagaMedis <span class="text-amber-400">TNI</span></h1>
+        <p class="text-xs text-emerald-200 mt-1 font-medium">Sistem Informasi Kesehatan Rumah Sakit Militer</p>
+      </div>
+
+      <!-- Login Card -->
+      <div class="bg-white rounded-t-[32px] px-6 pt-6 pb-8 shadow-2xl flex-1 flex flex-col justify-between">
+        <form onsubmit="handleLogin(event)" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="text-base font-extrabold text-slate-800">Masuk ke Sistem</h2>
+              <p class="text-[11px] text-slate-500">Masukkan identitas & pilih hak akses Anda</p>
+            </div>
+            <button type="button" onclick="fillDemoAccount()" class="text-[10px] font-bold px-2.5 py-1.5 rounded-xl bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100 transition">
+              Isi Contoh Akun
+            </button>
+          </div>
+
+          <!-- Input Nama / Pangkat -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">Nama Lengkap / Pangkat <span class="text-red-500">*</span></label>
+            <div class="relative">
+              <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="login-name" type="text" required placeholder="Contoh: Kapt. Inf. Arya Wijaya" class="w-full bg-slate-50 border border-slate-300 rounded-2xl pl-10 pr-3.5 py-2.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-[#064E3B] focus:bg-white transition" />
+            </div>
+          </div>
+
+          <!-- Input NRP / NIP -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1">NRP / NIP / ID Petugas</label>
+            <div class="relative">
+              <i data-lucide="badge-check" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+              <input id="login-nrp" type="text" placeholder="Contoh: 11180045210992 (Opsional)" class="w-full bg-slate-50 border border-slate-300 rounded-2xl pl-10 pr-3.5 py-2.5 text-xs font-mono font-semibold text-slate-800 focus:outline-none focus:border-[#064E3B] focus:bg-white transition" />
+            </div>
+          </div>
+
+          <!-- Pilihan Hak Akses (4 Role) -->
+          <div>
+            <label class="text-[11px] font-bold text-slate-700 block mb-1.5">Pilih Hak Akses (Role) <span class="text-red-500">*</span></label>
+            <div class="grid grid-cols-2 gap-2" id="login-role-grid">
+              <label class="cursor-pointer">
+                <input type="radio" name="loginRole" value="prajurit" checked class="peer sr-only" onchange="updateLoginRoleHint('prajurit')" />
+                <div class="p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-[#064E3B] peer-checked:bg-emerald-50/70 transition flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-100 text-[#064E3B] flex items-center justify-center shrink-0">
+                    <i data-lucide="user-check" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-extrabold text-slate-800">Prajurit TNI</span>
+                    <span class="block text-[9px] text-slate-500">Pasien / Konsumen</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="loginRole" value="dokter" class="peer sr-only" onchange="updateLoginRoleHint('dokter')" />
+                <div class="p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-[#064E3B] peer-checked:bg-emerald-50/70 transition flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
+                    <i data-lucide="stethoscope" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-extrabold text-slate-800">Dokter</span>
+                    <span class="block text-[9px] text-slate-500">Konsultasi & Resep</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="loginRole" value="perawat" class="peer sr-only" onchange="updateLoginRoleHint('perawat')" />
+                <div class="p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-[#064E3B] peer-checked:bg-emerald-50/70 transition flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="heart-pulse" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-extrabold text-slate-800">Perawat</span>
+                    <span class="block text-[9px] text-slate-500">Rekam Medis & Vital</span>
+                  </div>
+                </div>
+              </label>
+
+              <label class="cursor-pointer">
+                <input type="radio" name="loginRole" value="admin" class="peer sr-only" onchange="updateLoginRoleHint('admin')" />
+                <div class="p-2.5 rounded-2xl border-2 border-slate-200 peer-checked:border-[#064E3B] peer-checked:bg-emerald-50/70 transition flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0">
+                    <i data-lucide="clipboard-list" class="w-4 h-4"></i>
+                  </div>
+                  <div>
+                    <span class="block text-xs font-extrabold text-slate-800">Admin RS</span>
+                    <span class="block text-[9px] text-slate-500">Antrian & Komando</span>
+                  </div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <button type="submit" class="w-full py-3.5 bg-gradient-to-r from-[#022C22] via-[#064E3B] to-[#114232] hover:opacity-95 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-950/25 transition flex items-center justify-center gap-2 border border-amber-400/30">
+            <i data-lucide="log-in" class="w-4 h-4 text-amber-400"></i>
+            <span>MASUK KE SISTEM</span>
+          </button>
+        </form>
+
+        <p class="text-center text-[10px] text-slate-400 mt-4">
+          Pusat Kesehatan Tentara Nasional Indonesia • Terenkripsi
+        </p>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- MAIN DASHBOARD SHELL (HIDDEN UNTIL LOGIN)  -->
+    <!-- ========================================== -->
+    <div id="dashboard-screen" class="hidden flex-1 flex flex-col overflow-hidden">
+      <!-- Top Status & Header Bar -->
+      <header class="bg-gradient-to-r from-[#022C22] via-[#064E3B] to-tni-medium text-white pt-4 pb-3.5 px-5 shadow-md z-20 shrink-0">
+        <div class="flex items-center justify-between mb-2.5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-9 h-9 rounded-xl bg-amber-500/20 border border-amber-400/50 flex items-center justify-center text-amber-400 shadow-inner">
+              <i data-lucide="shield-plus" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-1.5">
+                <h1 class="font-extrabold text-base tracking-tight text-white leading-none">SiagaMedis <span class="text-amber-400">TNI</span></h1>
+              </div>
+              <p id="header-staff-badge" class="text-[10px] text-emerald-200 font-medium tracking-wide mt-0.5 truncate max-w-[190px]">RSPAD / Rumkit Tingkat II</p>
+            </div>
+          </div>
+
+          <!-- Notification & Logout Buttons -->
+          <div class="flex items-center gap-1.5">
+            <button onclick="showToast('Semua sistem terhubung ke Server Pusat Kesehatan TNI')" title="Notifikasi" class="relative p-2 rounded-xl bg-white/10 hover:bg-white/20 transition">
+              <i data-lucide="bell" class="w-4 h-4 text-amber-400"></i>
+              <span id="sos-badge" class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-[10px] font-bold rounded-full flex items-center justify-center animate-bounce">!</span>
+            </button>
+            <button onclick="logoutUser()" title="Keluar / Ganti Akun" class="px-2.5 py-2 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/30 text-red-100 text-[10px] font-bold flex items-center gap-1 transition">
+              <i data-lucide="log-out" class="w-3.5 h-3.5 text-red-300"></i>
+              <span>Keluar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Role Switcher Bar (4 Hak Akses) -->
+        <div class="bg-[#022C22]/70 p-1.5 rounded-2xl border border-white/10">
+          <div class="flex items-center justify-between px-1.5 mb-1">
+            <span class="text-[10px] font-semibold uppercase tracking-wider text-emerald-200 flex items-center gap-1">
+              <i data-lucide="key-round" class="w-3 h-3 text-amber-400"></i> Hak Akses Aktif:
+            </span>
+            <span id="active-role-label" class="text-[10px] font-bold text-amber-400">Prajurit TNI</span>
+          </div>
+          <div class="grid grid-cols-4 gap-1" id="role-switcher">
+            <button onclick="switchRole('prajurit')" data-role="prajurit" class="role-btn py-1.5 px-1 rounded-xl text-[11px] font-bold transition flex flex-col items-center justify-center gap-0.5 bg-amber-400 text-[#022C22] shadow">
+              <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+              <span>Prajurit</span>
+            </button>
+            <button onclick="switchRole('dokter')" data-role="dokter" class="role-btn py-1.5 px-1 rounded-xl text-[11px] font-medium text-emerald-100 hover:bg-white/10 transition flex flex-col items-center justify-center gap-0.5">
+              <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
+              <span>Dokter</span>
+            </button>
+            <button onclick="switchRole('perawat')" data-role="perawat" class="role-btn py-1.5 px-1 rounded-xl text-[11px] font-medium text-emerald-100 hover:bg-white/10 transition flex flex-col items-center justify-center gap-0.5">
+              <i data-lucide="heart-pulse" class="w-3.5 h-3.5"></i>
+              <span>Perawat</span>
+            </button>
+            <button onclick="switchRole('admin')" data-role="admin" class="role-btn py-1.5 px-1 rounded-xl text-[11px] font-medium text-emerald-100 hover:bg-white/10 transition flex flex-col items-center justify-center gap-0.5">
+              <i data-lucide="clipboard-list" class="w-3.5 h-3.5"></i>
+              <span>Admin RS</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Scrollable Content Area -->
+      <main id="main-content" class="flex-1 overflow-y-auto no-scrollbar pb-24 px-4 pt-4 space-y-4">
+        <!-- Dynamic View Rendered by JavaScript -->
+      </main>
+
+      <!-- Bottom Navigation Bar (Dynamic per Role) -->
+      <nav id="bottom-nav" class="bg-white border-t border-slate-200 px-2 py-2 flex justify-around items-center shrink-0 z-20 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
+        <!-- Navigation items rendered dynamically -->
+      </nav>
+    </div>
+
+    <!-- SOS Emergency Modal -->
+    <div id="sos-modal" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white w-full max-w-[380px] rounded-3xl overflow-hidden shadow-2xl border-2 border-red-500 fade-in">
+        <div class="bg-red-600 text-white p-5 text-center relative">
+          <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-3 sos-pulse">
+            <i data-lucide="siren" class="w-9 h-9 text-white"></i>
+          </div>
+          <h3 class="text-lg font-extrabold tracking-tight">PANGGILAN DARURAT MEDIS</h3>
+          <p class="text-xs text-red-100 mt-1">Sinyal SOS & Koordinat GPS akan segera dikirim ke IGD Rumkit TNI</p>
+        </div>
+        <div class="p-5 space-y-3">
+          <div class="bg-slate-50 p-3 rounded-2xl border border-slate-200 text-xs space-y-1.5">
+            <div class="flex justify-between">
+              <span class="text-slate-500">Personel:</span>
+              <span id="sos-modal-name" class="font-bold text-slate-800">Kapt. Inf. Arya Wijaya</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">NRP / Gol. Darah:</span>
+              <span id="sos-modal-nrp" class="font-bold text-red-600">11140028910592 • O+</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-500">Lokasi GPS:</span>
+              <span class="font-semibold text-emerald-700">-6.9175° S, 107.6191° E (Akurat 5m)</span>
+            </div>
+          </div>
+          <div id="sos-status-box" class="hidden bg-emerald-50 border border-emerald-200 text-emerald-800 p-3 rounded-2xl text-xs font-medium flex items-start gap-2">
+            <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-600 shrink-0 mt-0.5"></i>
+            <div>
+              <p class="font-bold">SINYAL SOS DITERIMA IGD!</p>
+              <p class="mt-0.5">Ambulans Tim Reaksi Cepat Rumkit Tk. II Dustira sedang meluncur (Estimasi 6 Menit).</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5 pt-2">
+            <button onclick="closeSOSModal()" class="py-3 px-4 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition">
+              Batal / Tutup
+            </button>
+            <button id="confirm-sos-btn" onclick="triggerSOSAlert()" class="py-3 px-4 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-bold text-xs shadow-lg shadow-red-600/30 transition flex items-center justify-center gap-1.5">
+              <i data-lucide="radio" class="w-4 h-4"></i> Kirim Sinyal SOS
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="hidden fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-[#022C22] text-white px-4 py-2.5 rounded-2xl shadow-xl border border-amber-400/40 text-xs font-medium flex items-center gap-2 max-w-[360px] w-[90%] fade-in">
+      <i data-lucide="shield-check" class="w-4 h-4 text-amber-400 shrink-0"></i>
+      <span id="toast-msg">Notifikasi sistem</span>
+    </div>
+
+  </div>
+
+  <!-- Application Logic & State -->
+  <script>
+    // ==========================================
+    // CENTRALIZED APPLICATION STATE (SHARED ACROSS 4 ROLES)
+    // ==========================================
+    const appState = {
+      isLoggedIn: false,
+      loggedInUserName: 'Kapt. Inf. Arya Wijaya',
+      loggedInUserId: '11140028910592',
+      currentRole: 'prajurit', // 'prajurit' | 'dokter' | 'perawat' | 'admin'
+      activeTab: 'beranda',
+
+      // Data Prajurit (Pasien Utama - Dinamis mengikuti input login jika role Prajurit)
+      soldier: {
+        name: 'Kapt. Inf. Arya Wijaya',
+        nrp: '11140028910592',
+        rank: 'Personel TNI Aktif',
+        unit: 'Yonif Raider 300/Bjw',
+        bloodType: 'O+',
+        age: 33,
+        allergies: 'Tidak ada alergi obat',
+        statusKesehatan: 'SIAP TEMPUR (STAKES I)'
+      },
+
+      // Identitas Petugas Medis / Admin (Dinamis jika login sebagai Dokter/Perawat/Admin)
+      staffNames: {
+        dokter: 'Letkol Ckm dr. Hendra, Sp.PD',
+        perawat: 'Letda Ckm (K) Ns. Ratna Sari, S.Kep',
+        admin: 'Serka Adm. Dedi Kurniawan'
+      },
+
+      // Data Tanda Vital Terbaru (Dimasukkan Perawat, Dimonitor Prajurit & Dokter)
+      vitals: {
+        bp: '118/76',
+        heartRate: 68,
+        spo2: 99,
+        temp: 36.5,
+        weight: 72,
+        height: 175,
+        bmi: '23.5 (Ideal)',
+        lastUpdated: 'Hari ini, 08:15 WIB oleh Ns. Ratna Sari'
+      },
+
+      // Daftar Pasien untuk Petugas Medis & Admin
+      patients: [
+        { nrp: '11140028910592', name: 'Kapt. Inf. Arya Wijaya', unit: 'Yonif Raider 300/Bjw', status: 'Siap Tempur' },
+        { nrp: '11190041200896', name: 'Letda Inf. Bagas Pratama', unit: 'Kikav 4/THC', status: 'Rawat Jalan' },
+        { nrp: '21160098120394', name: 'Serka Deni Kurniawan', unit: 'Yonarmed 4/Parahyangan', status: 'Kontrol Rutin' }
+      ],
+
+      // 1. Riwayat Rekam Medis
+      medicalRecords: [
+        {
+          id: 'RM-2026-089',
+          date: '14 Nov 2026',
+          poli: 'Poli Penyakit Dalam',
+          doctor: 'Letkol Ckm dr. Hendra, Sp.PD',
+          nurse: 'Ns. Ratna Sari, S.Kep',
+          complaint: 'Pemeriksaan kesehatan berkala (Rikkes) & keluhan pegal pasca latihan lapangan.',
+          diagnosis: 'Kelelahan Otot Ringan (Myalgia) & Kondisi Fisik Prima',
+          notes: 'Tekanan darah normal, fungsi jantung dan paru dalam batas sehat. Dianjurkan hidrasi cukup.',
+          labStatus: 'Normal (Hb: 15.2 g/dL, GDS: 96 mg/dL)'
+        },
+        {
+          id: 'RM-2026-042',
+          date: '02 Sep 2026',
+          poli: 'Poli Gigi & Mulut',
+          doctor: 'Mayor Ckm drg. Sinta Maharani',
+          nurse: 'Ns. Budi Santoso, Amd.Kep',
+          complaint: 'Pembersihan karang gigi rutin & kontrol geraham kanan.',
+          diagnosis: 'Gingivitis Ringan - Scaling Selesai',
+          notes: 'Gigi dalam kondisi baik, tidak ada karies aktif.',
+          labStatus: 'Tidak diperlukan'
+        }
+      ],
+
+      // 2. Konsultasi Kesehatan (Chat Real-time antara Prajurit & Dokter)
+      consultations: [
+        {
+          sender: 'dokter',
+          senderName: 'Letkol Ckm dr. Hendra, Sp.PD',
+          time: '09:10',
+          text: 'Selamat pagi Kapten, bagaimana kondisi fisik setelah latihan lintas medan kemarin?'
+        },
+        {
+          sender: 'prajurit',
+          senderName: 'Kapt. Inf. Arya Wijaya',
+          time: '09:12',
+          text: 'Selamat pagi Dok, secara umum bugar, namun lutut kanan sedikit terasa kaku saat pagi hari.'
+        },
+        {
+          sender: 'dokter',
+          senderName: 'Letkol Ckm dr. Hendra, Sp.PD',
+          time: '09:14',
+          text: 'Baik, saya sudah resepkan suplemen sendi dan salep pereda nyeri di menu Pengingat Obat. Kompres hangat 15 menit sebelum tidur ya.'
+        }
+      ],
+
+      // 3. Antrian Online Poli Rumah Sakit
+      queues: [
+        {
+          ticket: 'A-012',
+          nrp: '11140028910592',
+          patientName: 'Kapt. Inf. Arya Wijaya',
+          poli: 'Poli Penyakit Dalam',
+          date: 'Hari Ini',
+          timeSlot: '10:00 - 11:00 WIB',
+          status: 'Menunggu'
+        },
+        {
+          ticket: 'B-005',
+          nrp: '11190041200896',
+          patientName: 'Letda Inf. Bagas Pratama',
+          poli: 'Poli Ortopedi',
+          date: 'Hari Ini',
+          timeSlot: '10:30 - 11:30 WIB',
+          status: 'Dipanggil'
+        }
+      ],
+
+      // 5. Pengingat Obat & Resep Digital
+      prescriptions: [
+        {
+          id: 'RX-8821',
+          drugName: 'Glucosamine + Chondroitin 500mg',
+          dosage: '1 Tablet • Sesudah Makan Pagi',
+          schedule: '07:30 WIB',
+          doctor: 'Letkol Ckm dr. Hendra, Sp.PD',
+          takenToday: true,
+          remaining: 14
+        },
+        {
+          id: 'RX-8822',
+          drugName: 'Neurobion Forte (Vitamin B1, B6, B12)',
+          dosage: '1 Tablet • Sesudah Makan Malam',
+          schedule: '19:30 WIB',
+          doctor: 'Letkol Ckm dr. Hendra, Sp.PD',
+          takenToday: false,
+          remaining: 10
+        },
+        {
+          id: 'RX-8823',
+          drugName: 'Natrium Diclofenac Gel (Oles)',
+          dosage: 'Oles tipis pada lutut kanan',
+          schedule: '21:00 WIB',
+          doctor: 'Letkol Ckm dr. Hendra, Sp.PD',
+          takenToday: false,
+          remaining: 1
+        }
+      ],
+
+      // 6. Log Darurat SOS Kesehatan
+      sosLogs: []
+    };
+
+    // Konfigurasi Navigasi Bawah Berdasarkan Hak Akses (4 Role)
+    const navConfig = {
+      prajurit: [
+        { id: 'beranda', label: 'Beranda', icon: 'home' },
+        { id: 'rekam_medis', label: 'Rekam Medis', icon: 'file-text' },
+        { id: 'konsultasi', label: 'Konsultasi', icon: 'message-square' },
+        { id: 'antrian', label: 'Antrian', icon: 'calendar-clock' },
+        { id: 'obat', label: 'Obat', icon: 'pill' }
+      ],
+      dokter: [
+        { id: 'konsultasi', label: 'Konsultasi', icon: 'message-square' },
+        { id: 'resep_dokter', label: 'Buat Resep', icon: 'file-plus-2' },
+        { id: 'rekam_medis', label: 'Rekam Medis', icon: 'file-text' },
+        { id: 'monitoring', label: 'Monitoring', icon: 'activity' }
+      ],
+      perawat: [
+        { id: 'input_vital', label: 'Input Vital', icon: 'heart-pulse' },
+        { id: 'input_rm', label: 'Input RM', icon: 'clipboard-plus' },
+        { id: 'rekam_medis', label: 'Data RM', icon: 'folder-heart' }
+      ],
+      admin: [
+        { id: 'kelola_antrian', label: 'Antrian RS', icon: 'users' },
+        { id: 'data_prajurit', label: 'Data TNI', icon: 'shield-check' },
+        { id: 'sos_monitor', label: 'Log SOS', icon: 'siren' }
+      ]
+    };
+
+    const roleTitles = {
+      prajurit: 'Prajurit TNI',
+      dokter: 'Dokter Militer',
+      perawat: 'Perawat Medis',
+      admin: 'Admin Rumkit'
+    };
+
+    // ==========================================
+    // LOGIN & LOGOUT AUTHENTICATION LOGIC
+    // ==========================================
+    function getInitials(fullName) {
+      const clean = fullName.replace(/[^a-zA-Z\s]/g, '').trim();
+      const parts = clean.split(/\s+/).filter(Boolean);
+      if (parts.length === 0) return 'TN';
+      if (parts.length === 1) return parts[0].substring(0, 2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
+
+    function updateLoginRoleHint(role) {
+      const nameInput = document.getElementById('login-name');
+      const nrpInput = document.getElementById('login-nrp');
+      if (role === 'prajurit') {
+        nameInput.placeholder = 'Contoh: Kapt. Inf. Arya Wijaya';
+        nrpInput.placeholder = 'Contoh: 11140028910592 (NRP)';
+      } else if (role === 'dokter') {
+        nameInput.placeholder = 'Contoh: Letkol Ckm dr. Hendra, Sp.PD';
+        nrpInput.placeholder = 'Contoh: 11080031900485 (NRP/SIP)';
+      } else if (role === 'perawat') {
+        nameInput.placeholder = 'Contoh: Letda Ckm (K) Ns. Ratna Sari';
+        nrpInput.placeholder = 'Contoh: 21150089120794 (NRP/STR)';
+      } else if (role === 'admin') {
+        nameInput.placeholder = 'Contoh: Serka Adm. Budi Santoso';
+        nrpInput.placeholder = 'Contoh: 21170054120196 (NRP/NIP)';
+      }
+    }
+
+    function fillDemoAccount() {
+      const selectedRole = document.querySelector('input[name="loginRole"]:checked').value;
+      const nameInput = document.getElementById('login-name');
+      const nrpInput = document.getElementById('login-nrp');
+
+      if (selectedRole === 'prajurit') {
+        nameInput.value = 'Letda Inf. Rizky Ramadhan';
+        nrpInput.value = '11220034890199';
+      } else if (selectedRole === 'dokter') {
+        nameInput.value = 'Mayor Ckm dr. Farhan Hakim, Sp.PD';
+        nrpInput.value = '11110045120988';
+      } else if (selectedRole === 'perawat') {
+        nameInput.value = 'Sertu (K) Ns. Aulia Putri, S.Kep';
+        nrpInput.value = '21190078210397';
+      } else {
+        nameInput.value = 'Pelda Adm. Teguh Prakoso';
+        nrpInput.value = '21120065430891';
+      }
+      showToast('Contoh akun berhasil diisi. Silakan klik Masuk ke Sistem.');
+    }
+
+    function handleLogin(e) {
+      e.preventDefault();
+      const rawName = document.getElementById('login-name').value.trim();
+      const rawNrp = document.getElementById('login-nrp').value.trim();
+      const selectedRole = document.querySelector('input[name="loginRole"]:checked').value;
+
+      if (!rawName) return;
+
+      const userNrp = rawNrp || '11180045210992';
+      appState.isLoggedIn = true;
+      appState.loggedInUserName = rawName;
+      appState.loggedInUserId = userNrp;
+
+      // Sinkronkan nama ke data profil yang relevan
+      if (selectedRole === 'prajurit') {
+        const oldNrp = appState.soldier.nrp;
+        appState.soldier.name = rawName;
+        appState.soldier.nrp = userNrp;
+
+        appState.patients[0].name = rawName;
+        appState.patients[0].nrp = userNrp;
+
+        appState.queues.forEach(q => {
+          if (q.nrp === oldNrp) {
+            q.patientName = rawName;
+            q.nrp = userNrp;
+          }
+        });
+
+        appState.consultations.forEach(c => {
+          if (c.sender === 'prajurit') {
+            c.senderName = rawName;
+          }
+        });
+      } else {
+        appState.staffNames[selectedRole] = rawName;
+        if (selectedRole === 'dokter') {
+          appState.consultations.forEach(c => {
+            if (c.sender === 'dokter') c.senderName = rawName;
+          });
+        }
+      }
+
+      updateHeaderStaffBadge(selectedRole, rawName);
+
+      document.getElementById('login-screen').classList.add('hidden');
+      document.getElementById('dashboard-screen').classList.remove('hidden');
+
+      switchRole(selectedRole, true);
+      showToast(`Selamat datang, ${rawName}!`);
+    }
+
+    function updateHeaderStaffBadge(role, name) {
+      const badge = document.getElementById('header-staff-badge');
+      if (role === 'prajurit') {
+        badge.textContent = `Personel: ${name}`;
+      } else {
+        badge.textContent = `Petugas: ${name}`;
+      }
+    }
+
+    function logoutUser() {
+      appState.isLoggedIn = false;
+      document.getElementById('dashboard-screen').classList.add('hidden');
+      document.getElementById('login-screen').classList.remove('hidden');
+      lucide.createIcons();
+      showToast('Anda telah keluar dari sistem.');
+    }
+
+    // ==========================================
+    // CORE RENDER & SWITCHING LOGIC
+    // ==========================================
+    function switchRole(role, silent = false) {
+      appState.currentRole = role;
+      appState.activeTab = navConfig[role][0].id;
+
+      document.getElementById('active-role-label').textContent = roleTitles[role];
+
+      if (role === 'prajurit') {
+        updateHeaderStaffBadge('prajurit', appState.soldier.name);
+      } else {
+        updateHeaderStaffBadge(role, appState.staffNames[role]);
+      }
+
+      document.querySelectorAll('.role-btn').forEach(btn => {
+        if (btn.dataset.role === role) {
+          btn.className = 'role-btn py-1.5 px-1 rounded-xl text-[11px] font-bold transition flex flex-col items-center justify-center gap-0.5 bg-amber-400 text-[#022C22] shadow';
+        } else {
+          btn.className = 'role-btn py-1.5 px-1 rounded-xl text-[11px] font-medium text-emerald-100 hover:bg-white/10 transition flex flex-col items-center justify-center gap-0.5';
+        }
+      });
+
+      renderNav();
+      renderView();
+      if (!silent) {
+        showToast(`Beralih ke mode akses: ${roleTitles[role]}`);
+      }
+    }
+
+    function switchTab(tabId) {
+      appState.activeTab = tabId;
+      renderNav();
+      renderView();
+    }
+
+    function renderNav() {
+      const navEl = document.getElementById('bottom-nav');
+      const items = navConfig[appState.currentRole];
+      navEl.innerHTML = items.map(item => {
+        const isActive = item.id === appState.activeTab;
+        return `
+          <button onclick="switchTab('${item.id}')" class="flex flex-col items-center justify-center py-1 px-2.5 rounded-xl transition ${isActive ? 'text-tni-primary font-bold bg-tni-light' : 'text-slate-400 hover:text-slate-600 font-medium'}">
+            <i data-lucide="${item.icon}" class="w-5 h-5 mb-0.5 ${isActive ? 'text-tni-primary' : ''}"></i>
+            <span class="text-[10px]">${item.label}</span>
+          </button>
+        `;
+      }).join('');
+      lucide.createIcons();
+    }
+
+    function renderView() {
+      const mainEl = document.getElementById('main-content');
+      const role = appState.currentRole;
+      const tab = appState.activeTab;
+
+      if (role === 'prajurit') {
+        if (tab === 'beranda') mainEl.innerHTML = renderPrajuritBeranda();
+        else if (tab === 'rekam_medis') mainEl.innerHTML = renderRekamMedisView(false);
+        else if (tab === 'konsultasi') mainEl.innerHTML = renderPrajuritKonsultasi();
+        else if (tab === 'antrian') mainEl.innerHTML = renderPrajuritAntrian();
+        else if (tab === 'obat') mainEl.innerHTML = renderPrajuritObat();
+      } else if (role === 'dokter') {
+        if (tab === 'konsultasi') mainEl.innerHTML = renderDokterKonsultasi();
+        else if (tab === 'resep_dokter') mainEl.innerHTML = renderDokterBuatResep();
+        else if (tab === 'rekam_medis') mainEl.innerHTML = renderRekamMedisView(false);
+        else if (tab === 'monitoring') mainEl.innerHTML = renderMonitoringView();
+      } else if (role === 'perawat') {
+        if (tab === 'input_vital') mainEl.innerHTML = renderPerawatInputVital();
+        else if (tab === 'input_rm') mainEl.innerHTML = renderPerawatInputRM();
+        else if (tab === 'rekam_medis') mainEl.innerHTML = renderRekamMedisView(true);
+      } else if (role === 'admin') {
+        if (tab === 'kelola_antrian') mainEl.innerHTML = renderAdminAntrian();
+        else if (tab === 'data_prajurit') mainEl.innerHTML = renderAdminDataPrajurit();
+        else if (tab === 'sos_monitor') mainEl.innerHTML = renderAdminSOSMonitor();
+      }
+
+      lucide.createIcons();
+      const chatBox = document.getElementById('chat-messages');
+      if (chatBox) chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // ==========================================
+    // VIEW 1: PRAJURIT TNI (KONSUMEN / PASIEN)
+    // ==========================================
+    function renderPrajuritBeranda() {
+      const s = appState.soldier;
+      const v = appState.vitals;
+      const initials = getInitials(s.name);
+      const activeQueue = appState.queues.find(q => q.nrp === s.nrp && q.status !== 'Selesai');
+      const unconsumedMeds = appState.prescriptions.filter(p => !p.takenToday).length;
+
+      return `
+        <div class="space-y-4 fade-in">
+          <!-- Kartu Identitas Prajurit TNI (Nama Dinamis Sesuai Login) -->
+          <div class="bg-gradient-to-br from-[#022C22] via-[#064E3B] to-tni-medium rounded-3xl p-4 text-white shadow-lg relative overflow-hidden border border-amber-400/30">
+            <div class="absolute -right-6 -bottom-6 opacity-10">
+              <i data-lucide="shield" class="w-36 h-36"></i>
+            </div>
+            <div class="flex items-start justify-between">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-amber-400 text-[#022C22] font-extrabold flex items-center justify-center text-lg shadow shrink-0">
+                  ${initials}
+                </div>
+                <div>
+                  <span class="inline-block px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-bold tracking-wide mb-1">
+                    ${s.statusKesehatan}
+                  </span>
+                  <h2 class="font-bold text-base leading-tight">${s.name}</h2>
+                  <p class="text-xs text-emerald-200">${s.unit}</p>
+                </div>
+              </div>
+              <div class="text-right bg-white/10 px-2.5 py-1.5 rounded-xl border border-white/10 shrink-0">
+                <span class="block text-[9px] text-emerald-200 uppercase">Gol. Darah</span>
+                <span class="font-extrabold text-sm text-amber-400">${s.bloodType}</span>
+              </div>
+            </div>
+            <div class="mt-3 pt-2.5 border-t border-white/15 flex justify-between items-center text-[11px] text-emerald-100">
+              <span>NRP: <strong class="text-white font-mono">${s.nrp}</strong></span>
+              <span>Usia: <strong class="text-white">${s.age} Thn</strong></span>
+            </div>
+          </div>
+
+          <!-- Tombol Darurat SOS Kesehatan (Fitur 6) -->
+          <button onclick="openSOSModal()" class="w-full bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-700 hover:to-rose-800 text-white p-3.5 rounded-2xl shadow-lg shadow-red-600/20 flex items-center justify-between transition active:scale-[0.99]">
+            <div class="flex items-center gap-3">
+              <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center sos-pulse">
+                <i data-lucide="siren" class="w-6 h-6 text-white"></i>
+              </div>
+              <div class="text-left">
+                <span class="block font-extrabold text-sm tracking-tight">TOMBOL DARURAT SOS MEDIS</span>
+                <span class="block text-[11px] text-red-100">Kirim sinyal darurat & GPS ke IGD Rumkit TNI</span>
+              </div>
+            </div>
+            <i data-lucide="chevron-right" class="w-5 h-5 text-white/80"></i>
+          </button>
+
+          <!-- Monitoring Kesehatan Singkat (Fitur 4) -->
+          <div class="bg-white rounded-3xl p-4 shadow-sm border border-slate-200/80">
+            <div class="flex items-center justify-between mb-3">
+              <div class="flex items-center gap-2">
+                <div class="w-7 h-7 rounded-lg bg-emerald-100 text-tni-primary flex items-center justify-center">
+                  <i data-lucide="activity" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h3 class="font-bold text-xs text-slate-800">Monitoring Tanda Vital</h3>
+                  <p class="text-[10px] text-slate-400">${v.lastUpdated}</p>
+                </div>
+              </div>
+              <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">Normal</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2">
+              <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100 text-center">
+                <span class="text-[10px] text-slate-500 block">Tekanan Darah</span>
+                <span class="font-extrabold text-sm text-slate-800 mt-0.5 block">${v.bp}</span>
+                <span class="text-[9px] text-slate-400">mmHg</span>
+              </div>
+              <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100 text-center">
+                <span class="text-[10px] text-slate-500 block">Detak Jantung</span>
+                <span class="font-extrabold text-sm text-rose-600 mt-0.5 block">${v.heartRate}</span>
+                <span class="text-[9px] text-slate-400">bpm</span>
+              </div>
+              <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100 text-center">
+                <span class="text-[10px] text-slate-500 block">Saturasi O₂</span>
+                <span class="font-extrabold text-sm text-sky-600 mt-0.5 block">${v.spo2}%</span>
+                <span class="text-[9px] text-slate-400">SpO2</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Akses Cepat 6 Fitur Utama -->
+          <div>
+            <h3 class="font-bold text-xs text-slate-700 mb-2.5 px-1">Layanan Kesehatan Terpadu</h3>
+            <div class="grid grid-cols-2 gap-2.5">
+              <button onclick="switchTab('rekam_medis')" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-emerald-400 transition text-left flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-emerald-50 text-tni-primary flex items-center justify-center shrink-0">
+                  <i data-lucide="file-text" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <span class="block font-bold text-xs text-slate-800">Rekam Medis</span>
+                  <span class="block text-[10px] text-slate-500 mt-0.5">${appState.medicalRecords.length} Riwayat Rikkes</span>
+                </div>
+              </button>
+
+              <button onclick="switchTab('konsultasi')" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-emerald-400 transition text-left flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center shrink-0">
+                  <i data-lucide="stethoscope" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <span class="block font-bold text-xs text-slate-800">Konsultasi</span>
+                  <span class="block text-[10px] text-emerald-600 font-semibold mt-0.5">Dokter Siaga</span>
+                </div>
+              </button>
+
+              <button onclick="switchTab('antrian')" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-emerald-400 transition text-left flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-sky-50 text-sky-700 flex items-center justify-center shrink-0">
+                  <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <span class="block font-bold text-xs text-slate-800">Antrian Poli</span>
+                  <span class="block text-[10px] text-slate-500 mt-0.5">${activeQueue ? 'Tiket ' + activeQueue.ticket : 'Daftar Online'}</span>
+                </div>
+              </button>
+
+              <button onclick="switchTab('obat')" class="bg-white p-3.5 rounded-2xl border border-slate-200/80 shadow-sm hover:border-emerald-400 transition text-left flex items-start gap-3">
+                <div class="w-9 h-9 rounded-xl bg-purple-50 text-purple-700 flex items-center justify-center shrink-0">
+                  <i data-lucide="pill" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <span class="block font-bold text-xs text-slate-800">Resep & Obat</span>
+                  <span class="block text-[10px] text-amber-600 font-semibold mt-0.5">${unconsumedMeds} Jadwal Aktif</span>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // Fitur 1: Riwayat Rekam Medis (Shared View)
+    function renderRekamMedisView(canAdd) {
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div class="flex items-center justify-between">
+            <div>
+              <h2 class="font-extrabold text-base text-slate-800">Riwayat Rekam Medis</h2>
+              <p class="text-xs text-slate-500">Pasien: ${appState.soldier.name}</p>
+            </div>
+            ${canAdd ? `
+              <button onclick="switchTab('input_rm')" class="bg-tni-primary text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1 shadow">
+                <i data-lucide="plus" class="w-4 h-4"></i> Tambah
+              </button>
+            ` : `
+              <span class="text-[10px] font-bold bg-emerald-100 text-tni-primary px-2.5 py-1 rounded-full">Terenkripsi</span>
+            `}
+          </div>
+
+          <div class="space-y-3">
+            ${appState.medicalRecords.map(rm => `
+              <div class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+                <div class="flex justify-between items-start border-b border-slate-100 pb-2">
+                  <div>
+                    <span class="text-[10px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded-md border border-amber-200">${rm.id} • ${rm.date}</span>
+                    <h3 class="font-bold text-sm text-slate-800 mt-1">${rm.poli}</h3>
+                  </div>
+                  <span class="text-[10px] font-semibold text-slate-500 text-right">${rm.doctor}</span>
+                </div>
+                <div class="text-xs space-y-1.5">
+                  <div>
+                    <span class="text-slate-400 font-medium block text-[10px] uppercase">Keluhan & Pemeriksaan:</span>
+                    <p class="text-slate-700">${rm.complaint}</p>
+                  </div>
+                  <div class="bg-emerald-50/70 p-2.5 rounded-xl border border-emerald-100">
+                    <span class="text-tni-primary font-bold block text-[10px] uppercase">Diagnosis Dokter:</span>
+                    <p class="text-slate-800 font-semibold">${rm.diagnosis}</p>
+                  </div>
+                  <div class="flex justify-between items-center pt-1 text-[11px] text-slate-500">
+                    <span>Lab: <strong class="text-slate-700">${rm.labStatus}</strong></span>
+                    <span>Input: ${rm.nurse}</span>
+                  </div>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // Fitur 2: Konsultasi Kesehatan (Tampilan Prajurit)
+    function renderPrajuritKonsultasi() {
+      const activeDoctor = appState.staffNames.dokter;
+      const docInitials = getInitials(activeDoctor);
+
+      return `
+        <div class="flex flex-col h-[calc(100vh-225px)] sm:h-[600px] fade-in">
+          <!-- Doctor Info Header -->
+          <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between mb-3 shrink-0">
+            <div class="flex items-center gap-2.5">
+              <div class="w-10 h-10 rounded-full bg-[#064E3B] text-amber-400 font-bold flex items-center justify-center text-sm shrink-0">
+                ${docInitials}
+              </div>
+              <div>
+                <h3 class="text-xs font-bold text-slate-800">${activeDoctor}</h3>
+                <p class="text-[10px] text-emerald-600 font-semibold flex items-center gap-1">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block"></span> Online • Telemedis Rumkit TNI
+                </p>
+              </div>
+            </div>
+            <span class="text-[10px] bg-tni-light text-tni-primary font-bold px-2 py-1 rounded-lg">Poli Dalam</span>
+          </div>
+
+          <!-- Messages Area -->
+          <div id="chat-messages" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 p-1">
+            ${appState.consultations.map(msg => {
+              const isMe = msg.sender === 'prajurit';
+              return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                  <span class="text-[9px] text-slate-400 mb-0.5 px-1">${msg.senderName} • ${msg.time}</span>
+                  <div class="max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${isMe ? 'bg-[#064E3B] text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm'}">
+                    ${msg.text}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <!-- Chat Input -->
+          <form onsubmit="sendConsultMessage(event, 'prajurit')" class="mt-2.5 flex gap-2 shrink-0">
+            <input id="prajurit-chat-input" type="text" required placeholder="Tulis keluhan kesehatan Anda ke Dokter..." class="flex-1 bg-white border border-slate-300 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-tni-primary" />
+            <button type="submit" class="bg-[#064E3B] hover:bg-[#022C22] text-white px-4 rounded-2xl font-bold text-xs flex items-center justify-center shadow">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    // Fitur 3: Antrian Online Poli (Tampilan Prajurit)
+    function renderPrajuritAntrian() {
+      const myQueues = appState.queues.filter(q => q.nrp === appState.soldier.nrp);
+      return `
+        <div class="space-y-4 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Antrian Online Rumkit</h2>
+            <p class="text-xs text-slate-500">Ambil nomor antrian poli tanpa menunggu lama</p>
+          </div>
+
+          <!-- Tiket Aktif -->
+          ${myQueues.map(q => `
+            <div class="bg-gradient-to-r from-[#064E3B] to-tni-medium text-white rounded-3xl p-4 shadow-md border border-amber-400/30">
+              <div class="flex justify-between items-center border-b border-white/15 pb-2.5 mb-2.5">
+                <span class="text-[10px] uppercase tracking-wider text-emerald-200 font-semibold">Nomor Antrian Anda</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold ${q.status === 'Dipanggil' ? 'bg-amber-400 text-[#022C22] animate-pulse' : 'bg-white/15 text-white'}">
+                  ${q.status}
+                </span>
+              </div>
+              <div class="flex items-center justify-between">
+                <div>
+                  <span class="text-3xl font-extrabold text-amber-400 tracking-tight">${q.ticket}</span>
+                  <h3 class="font-bold text-sm mt-0.5">${q.poli}</h3>
+                  <p class="text-[11px] text-emerald-100">${q.date} • ${q.timeSlot}</p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center">
+                  <i data-lucide="qr-code" class="w-7 h-7 text-amber-300"></i>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+
+          <!-- Form Pendaftaran Antrian Baru -->
+          <form onsubmit="bookNewQueue(event)" class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <h3 class="font-bold text-xs text-slate-800 flex items-center gap-1.5">
+              <i data-lucide="calendar-plus" class="w-4 h-4 text-tni-primary"></i> Daftar Antrian Poli Baru
+            </h3>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Pilih Poliklinik Rumkit TNI</label>
+              <select id="queue-poli" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2.5 text-xs font-medium">
+                <option value="Poli Umum & Rikkes">Poli Umum & Rikkes</option>
+                <option value="Poli Penyakit Dalam">Poli Penyakit Dalam</option>
+                <option value="Poli Ortopedi & Cedera Latihan">Poli Ortopedi & Cedera Latihan</option>
+                <option value="Poli Gigi & Mulut">Poli Gigi & Mulut</option>
+                <option value="Poli Mata & THT">Poli Mata & THT</option>
+              </select>
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Tanggal</label>
+                <select id="queue-date" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                  <option value="Hari Ini">Hari Ini</option>
+                  <option value="Besok">Besok</option>
+                </select>
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Sesi Jam</label>
+                <select id="queue-slot" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                  <option value="08:00 - 10:00 WIB">08:00 - 10:00</option>
+                  <option value="10:00 - 12:00 WIB">10:00 - 12:00</option>
+                  <option value="13:00 - 15:00 WIB">13:00 - 15:00</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-[#064E3B] hover:bg-[#022C22] text-white font-bold text-xs rounded-xl transition shadow">
+              Ambil Nomor Antrian
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    // Fitur 5: Pengingat Obat & Resep Digital (Tampilan Prajurit)
+    function renderPrajuritObat() {
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Pengingat Obat & Resep Digital</h2>
+            <p class="text-xs text-slate-500">Resep resmi dari Dokter Rumkit TNI</p>
+          </div>
+
+          <div class="space-y-2.5">
+            ${appState.prescriptions.map((rx, idx) => `
+              <div class="bg-white rounded-3xl p-4 border ${rx.takenToday ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200'} shadow-sm">
+                <div class="flex justify-between items-start">
+                  <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-2xl ${rx.takenToday ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'} flex items-center justify-center shrink-0">
+                      <i data-lucide="pill" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                      <span class="text-[10px] font-bold text-slate-400">${rx.id} • Jadwal ${rx.schedule}</span>
+                      <h3 class="font-bold text-xs text-slate-800 mt-0.5">${rx.drugName}</h3>
+                      <p class="text-[11px] text-slate-600 mt-0.5">${rx.dosage}</p>
+                      <p class="text-[10px] text-slate-400 mt-1">Oleh: ${rx.doctor} • Sisa: ${rx.remaining}</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-[11px] font-semibold ${rx.takenToday ? 'text-emerald-600' : 'text-amber-600'}">
+                    ${rx.takenToday ? '✓ Sudah diminum hari ini' : '⏰ Belum diminum'}
+                  </span>
+                  <button onclick="toggleMedication(${idx})" class="px-3 py-1.5 rounded-xl text-[11px] font-bold transition ${rx.takenToday ? 'bg-slate-200 text-slate-600' : 'bg-[#064E3B] text-white shadow'}">
+                    ${rx.takenToday ? 'Batalkan' : 'Tandai Sudah Minum'}
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // VIEW 2: DOKTER (KONSULTASI & RESEP DIGITAL)
+    // ==========================================
+    function renderDokterKonsultasi() {
+      const activeDoctor = appState.staffNames.dokter;
+      return `
+        <div class="flex flex-col h-[calc(100vh-225px)] sm:h-[600px] fade-in">
+          <div class="bg-[#022C22] text-white p-3 rounded-2xl mb-3 flex items-center justify-between shrink-0">
+            <div>
+              <span class="text-[10px] text-amber-400 font-bold uppercase">${activeDoctor}</span>
+              <h3 class="text-xs font-bold">Pasien: ${appState.soldier.name}</h3>
+              <p class="text-[10px] text-emerald-200">Tensi: ${appState.vitals.bp} mmHg • Nadi: ${appState.vitals.heartRate} bpm</p>
+            </div>
+            <button onclick="switchTab('resep_dokter')" class="bg-amber-400 text-[#022C22] text-[10px] font-extrabold px-2.5 py-1.5 rounded-xl shadow">
+              + Buat Resep
+            </button>
+          </div>
+
+          <div id="chat-messages" class="flex-1 overflow-y-auto no-scrollbar space-y-2.5 p-1">
+            ${appState.consultations.map(msg => {
+              const isMe = msg.sender === 'dokter';
+              return `
+                <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'}">
+                  <span class="text-[9px] text-slate-400 mb-0.5 px-1">${msg.senderName} • ${msg.time}</span>
+                  <div class="max-w-[82%] px-3.5 py-2.5 rounded-2xl text-xs leading-relaxed ${isMe ? 'bg-amber-600 text-white rounded-br-sm' : 'bg-white border border-slate-200 text-slate-800 rounded-bl-sm shadow-sm'}">
+                    ${msg.text}
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+
+          <form onsubmit="sendConsultMessage(event, 'dokter')" class="mt-2.5 flex gap-2 shrink-0">
+            <input id="dokter-chat-input" type="text" required placeholder="Tulis saran medis atau instruksi ke Prajurit..." class="flex-1 bg-white border border-slate-300 rounded-2xl px-3.5 py-2.5 text-xs focus:outline-none focus:border-amber-600" />
+            <button type="submit" class="bg-amber-600 hover:bg-amber-700 text-white px-4 rounded-2xl font-bold text-xs flex items-center justify-center shadow">
+              <i data-lucide="send" class="w-4 h-4"></i>
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    function renderDokterBuatResep() {
+      return `
+        <div class="space-y-4 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Terbitkan Resep Digital</h2>
+            <p class="text-xs text-slate-500">Resep akan langsung masuk ke Pengingat Obat Prajurit</p>
+          </div>
+
+          <form onsubmit="addDigitalPrescription(event)" class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Pasien Prajurit</label>
+              <input type="text" disabled value="${appState.soldier.name} (${appState.soldier.nrp})" class="w-full bg-slate-100 border border-slate-200 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600" />
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Nama Obat / Suplemen</label>
+              <input id="rx-name" type="text" required placeholder="Contoh: Paracetamol 500mg / Vitamin C" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Aturan Pakai</label>
+                <input id="rx-dosage" type="text" required placeholder="3x1 Sesudah Makan" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Jumlah</label>
+                <input id="rx-qty" type="number" required value="10" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+              </div>
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Jadwal Pengingat Utama</label>
+              <input id="rx-schedule" type="text" required value="08:00 WIB" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <button type="submit" class="w-full py-3 bg-[#064E3B] hover:bg-[#022C22] text-white font-bold text-xs rounded-xl shadow transition">
+              Kirim Resep Digital ke Pasien
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    function renderMonitoringView() {
+      const v = appState.vitals;
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Monitoring Kesehatan Pasien</h2>
+            <p class="text-xs text-slate-500">${appState.soldier.name} • ${v.lastUpdated}</p>
+          </div>
+          <div class="grid grid-cols-2 gap-2.5">
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200">
+              <span class="text-[11px] text-slate-500">Tekanan Darah</span>
+              <p class="text-lg font-extrabold text-slate-800 mt-0.5">${v.bp} <span class="text-xs font-normal text-slate-400">mmHg</span></p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200">
+              <span class="text-[11px] text-slate-500">Detak Jantung</span>
+              <p class="text-lg font-extrabold text-rose-600 mt-0.5">${v.heartRate} <span class="text-xs font-normal text-slate-400">bpm</span></p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200">
+              <span class="text-[11px] text-slate-500">Saturasi Oksigen</span>
+              <p class="text-lg font-extrabold text-sky-600 mt-0.5">${v.spo2}% <span class="text-xs font-normal text-slate-400">SpO2</span></p>
+            </div>
+            <div class="bg-white p-3.5 rounded-2xl border border-slate-200">
+              <span class="text-[11px] text-slate-500">Suhu Tubuh</span>
+              <p class="text-lg font-extrabold text-amber-600 mt-0.5">${v.temp}°C</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // VIEW 3: PERAWAT (INPUT REKAM MEDIS & VITAL)
+    // ==========================================
+    function renderPerawatInputVital() {
+      const v = appState.vitals;
+      return `
+        <div class="space-y-4 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Input Tanda Vital (Triase)</h2>
+            <p class="text-xs text-slate-500">Petugas: ${appState.staffNames.perawat}</p>
+          </div>
+
+          <form onsubmit="updateVitalsByNurse(event)" class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <div class="bg-emerald-50 p-2.5 rounded-xl border border-emerald-200 text-xs">
+              <span class="text-slate-500">Pasien Aktif:</span>
+              <strong class="block text-slate-800">${appState.soldier.name} (${appState.soldier.nrp})</strong>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2.5">
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Tekanan Darah (mmHg)</label>
+                <input id="vital-bp" type="text" required value="${v.bp}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Detak Jantung (bpm)</label>
+                <input id="vital-hr" type="number" required value="${v.heartRate}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Saturasi O₂ (%)</label>
+                <input id="vital-spo2" type="number" required value="${v.spo2}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold" />
+              </div>
+              <div>
+                <label class="text-[11px] font-semibold text-slate-600 block mb-1">Suhu Tubuh (°C)</label>
+                <input id="vital-temp" type="number" step="0.1" required value="${v.temp}" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs font-bold" />
+              </div>
+            </div>
+
+            <button type="submit" class="w-full py-3 bg-[#064E3B] hover:bg-[#022C22] text-white font-bold text-xs rounded-xl shadow transition">
+              Simpan & Sinkronkan Tanda Vital
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    function renderPerawatInputRM() {
+      return `
+        <div class="space-y-4 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Input Rekam Medis Baru</h2>
+            <p class="text-xs text-slate-500">Catat hasil pemeriksaan ke rekam medis digital TNI</p>
+          </div>
+
+          <form onsubmit="addMedicalRecordByNurse(event)" class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-3">
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Poliklinik Pemeriksaan</label>
+              <select id="rm-poli" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs">
+                <option value="Poli Penyakit Dalam">Poli Penyakit Dalam</option>
+                <option value="Poli Umum & Rikkes">Poli Umum & Rikkes</option>
+                <option value="Poli Ortopedi">Poli Ortopedi</option>
+                <option value="Poli Gigi & Mulut">Poli Gigi & Mulut</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Keluhan & Anamnesis</label>
+              <textarea id="rm-complaint" rows="2" required placeholder="Tuliskan keluhan utama prajurit..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs"></textarea>
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Diagnosis Medis</label>
+              <input id="rm-diagnosis" type="text" required placeholder="Contoh: Observasi Febris / Cedera Ringan" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Hasil Lab / Penunjang</label>
+              <input id="rm-lab" type="text" value="Dalam batas normal" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <div>
+              <label class="text-[11px] font-semibold text-slate-600 block mb-1">Catatan Tindakan Perawat</label>
+              <input id="rm-notes" type="text" required placeholder="Contoh: Edukasi istirahat & pemberian obat" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <button type="submit" class="w-full py-3 bg-[#064E3B] hover:bg-[#022C22] text-white font-bold text-xs rounded-xl shadow transition">
+              Simpan Rekam Medis ke Server
+            </button>
+          </form>
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // VIEW 4: ADMINISTRASI RUMAH SAKIT
+    // ==========================================
+    function renderAdminAntrian() {
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Manajemen Antrian Rumkit</h2>
+            <p class="text-xs text-slate-500">Petugas: ${appState.staffNames.admin}</p>
+          </div>
+
+          <div class="space-y-2.5">
+            ${appState.queues.map((q, idx) => `
+              <div class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <span class="text-lg font-extrabold text-tni-primary">${q.ticket}</span>
+                    <h3 class="font-bold text-xs text-slate-800">${q.patientName}</h3>
+                    <p class="text-[11px] text-slate-500">${q.poli} • ${q.timeSlot}</p>
+                  </div>
+                  <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${q.status === 'Dipanggil' ? 'bg-amber-100 text-amber-800' : q.status === 'Selesai' ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'}">
+                    ${q.status}
+                  </span>
+                </div>
+                <div class="mt-3 pt-2.5 border-t border-slate-100 flex gap-2">
+                  <button onclick="updateQueueStatus(${idx}, 'Dipanggil')" class="flex-1 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-bold text-[11px] transition">
+                    Panggil Pasien
+                  </button>
+                  <button onclick="updateQueueStatus(${idx}, 'Selesai')" class="flex-1 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[11px] transition">
+                    Tandai Selesai
+                  </button>
+                </div>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdminDataPrajurit() {
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Database Personel TNI</h2>
+            <p class="text-xs text-slate-500">Registrasi & pembaruan status kesatuan pasien</p>
+          </div>
+
+          <form onsubmit="addPatientByAdmin(event)" class="bg-white rounded-3xl p-4 border border-slate-200 shadow-sm space-y-2.5">
+            <h3 class="font-bold text-xs text-slate-800">Registrasi Personel Baru</h3>
+            <input id="adm-name" type="text" required placeholder="Pangkat & Nama Lengkap" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            <div class="grid grid-cols-2 gap-2">
+              <input id="adm-nrp" type="text" required placeholder="Nomor NRP" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+              <input id="adm-unit" type="text" required placeholder="Kesatuan / Batalyon" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-3 py-2 text-xs" />
+            </div>
+            <button type="submit" class="w-full py-2.5 bg-[#064E3B] text-white font-bold text-xs rounded-xl shadow">
+              Simpan Data Personel
+            </button>
+          </form>
+
+          <div class="space-y-2">
+            ${appState.patients.map(p => `
+              <div class="bg-white p-3 rounded-2xl border border-slate-200 flex justify-between items-center">
+                <div>
+                  <h4 class="font-bold text-xs text-slate-800">${p.name}</h4>
+                  <p class="text-[10px] text-slate-500">NRP: ${p.nrp} • ${p.unit}</p>
+                </div>
+                <span class="text-[10px] font-bold bg-emerald-50 text-tni-primary px-2 py-1 rounded-lg border border-emerald-200">${p.status}</span>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAdminSOSMonitor() {
+      return `
+        <div class="space-y-3.5 fade-in">
+          <div>
+            <h2 class="font-extrabold text-base text-slate-800">Pusat Komando Darurat (SOS)</h2>
+            <p class="text-xs text-slate-500">Pemantauan sinyal darurat medis prajurit di lapangan</p>
+          </div>
+
+          ${appState.sosLogs.length === 0 ? `
+            <div class="bg-white rounded-3xl p-6 border border-slate-200 text-center space-y-2">
+              <div class="w-12 h-12 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto">
+                <i data-lucide="shield-check" class="w-6 h-6"></i>
+              </div>
+              <h3 class="font-bold text-xs text-slate-800">Situasi Aman Terkendali</h3>
+              <p class="text-[11px] text-slate-500">Belum ada panggilan darurat SOS aktif saat ini.</p>
+            </div>
+          ` : appState.sosLogs.map(log => `
+            <div class="bg-red-50 border-2 border-red-500 rounded-3xl p-4 space-y-1.5">
+              <div class="flex justify-between items-center">
+                <span class="px-2 py-0.5 bg-red-600 text-white text-[10px] font-extrabold rounded-md animate-pulse">DARURAT AKTIF</span>
+                <span class="text-[10px] font-bold text-red-700">${log.time}</span>
+              </div>
+              <h3 class="font-extrabold text-sm text-slate-900">${log.name}</h3>
+              <p class="text-xs text-slate-700">NRP: ${log.nrp} • Gol. Darah: <strong>${log.bloodType}</strong></p>
+              <p class="text-[11px] text-red-700 font-semibold">Koordinat: ${log.location}</p>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    // ==========================================
+    // INTERACTIVE ACTION HANDLERS
+    // ==========================================
+    function sendConsultMessage(e, senderRole) {
+      e.preventDefault();
+      const inputId = senderRole === 'prajurit' ? 'prajurit-chat-input' : 'dokter-chat-input';
+      const input = document.getElementById(inputId);
+      const text = input.value.trim();
+      if (!text) return;
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+      appState.consultations.push({
+        sender: senderRole,
+        senderName: senderRole === 'prajurit' ? appState.soldier.name : appState.staffNames.dokter,
+        time: timeStr,
+        text: text
+      });
+
+      input.value = '';
+      renderView();
+
+      if (senderRole === 'prajurit') {
+        setTimeout(() => {
+          if (appState.activeTab === 'konsultasi') {
+            appState.consultations.push({
+              sender: 'dokter',
+              senderName: appState.staffNames.dokter,
+              time: timeStr,
+              text: `Siap ${appState.soldier.name}, keluhan sudah saya catat. Silakan lanjutkan terapi obat di menu Pengingat Obat atau ambil antrian poli jika perlu pemeriksaan fisik lanjutan.`
+            });
+            renderView();
+          }
+        }, 1200);
+      }
+    }
+
+    function bookNewQueue(e) {
+      e.preventDefault();
+      const poli = document.getElementById('queue-poli').value;
+      const date = document.getElementById('queue-date').value;
+      const timeSlot = document.getElementById('queue-slot').value;
+      const ticketNum = `A-0${13 + appState.queues.length}`;
+
+      appState.queues.unshift({
+        ticket: ticketNum,
+        nrp: appState.soldier.nrp,
+        patientName: appState.soldier.name,
+        poli: poli,
+        date: date,
+        timeSlot: timeSlot,
+        status: 'Menunggu'
+      });
+
+      showToast(`Nomor antrian ${ticketNum} berhasil diterbitkan!`);
+      renderView();
+    }
+
+    function toggleMedication(index) {
+      const item = appState.prescriptions[index];
+      item.takenToday = !item.takenToday;
+      if (item.takenToday && item.remaining > 0) item.remaining -= 1;
+      else if (!item.takenToday) item.remaining += 1;
+      showToast(item.takenToday ? `Obat ${item.drugName} ditandai sudah diminum.` : 'Status konsumsi obat dibatalkan.');
+      renderView();
+    }
+
+    function addDigitalPrescription(e) {
+      e.preventDefault();
+      const name = document.getElementById('rx-name').value;
+      const dosage = document.getElementById('rx-dosage').value;
+      const qty = parseInt(document.getElementById('rx-qty').value, 10);
+      const schedule = document.getElementById('rx-schedule').value;
+
+      appState.prescriptions.unshift({
+        id: `RX-${Math.floor(1000 + Math.random() * 9000)}`,
+        drugName: name,
+        dosage: dosage,
+        schedule: schedule,
+        doctor: appState.staffNames.dokter,
+        takenToday: false,
+        remaining: qty
+      });
+
+      showToast('Resep digital berhasil dikirim ke aplikasi Prajurit!');
+      renderView();
+    }
+
+    function updateVitalsByNurse(e) {
+      e.preventDefault();
+      appState.vitals.bp = document.getElementById('vital-bp').value;
+      appState.vitals.heartRate = document.getElementById('vital-hr').value;
+      appState.vitals.spo2 = document.getElementById('vital-spo2').value;
+      appState.vitals.temp = document.getElementById('vital-temp').value;
+      appState.vitals.lastUpdated = `Baru saja oleh ${appState.staffNames.perawat}`;
+
+      showToast('Data tanda vital berhasil diperbarui untuk Dokter & Prajurit!');
+      renderView();
+    }
+
+    function addMedicalRecordByNurse(e) {
+      e.preventDefault();
+      const poli = document.getElementById('rm-poli').value;
+      const complaint = document.getElementById('rm-complaint').value;
+      const diagnosis = document.getElementById('rm-diagnosis').value;
+      const lab = document.getElementById('rm-lab').value;
+      const notes = document.getElementById('rm-notes').value;
+
+      appState.medicalRecords.unshift({
+        id: `RM-2026-${Math.floor(100 + Math.random() * 899)}`,
+        date: '18 Nov 2026',
+        poli: poli,
+        doctor: appState.staffNames.dokter,
+        nurse: appState.staffNames.perawat,
+        complaint: complaint,
+        diagnosis: diagnosis,
+        notes: notes,
+        labStatus: lab
+      });
+
+      showToast('Rekam medis baru berhasil ditambahkan ke riwayat pasien!');
+      e.target.reset();
+    }
+
+    function updateQueueStatus(index, newStatus) {
+      appState.queues[index].status = newStatus;
+      showToast(`Status antrian ${appState.queues[index].ticket} diubah menjadi: ${newStatus}`);
+      renderView();
+    }
+
+    function addPatientByAdmin(e) {
+      e.preventDefault();
+      const name = document.getElementById('adm-name').value;
+      const nrp = document.getElementById('adm-nrp').value;
+      const unit = document.getElementById('adm-unit').value;
+
+      appState.patients.unshift({
+        nrp: nrp,
+        name: name,
+        unit: unit,
+        status: 'Terdaftar Aktif'
+      });
+
+      showToast(`Personel ${name} berhasil didaftarkan ke database Rumkit.`);
+      e.target.reset();
+      renderView();
+    }
+
+    // SOS Modal Handlers
+    function openSOSModal() {
+      document.getElementById('sos-modal-name').textContent = appState.soldier.name;
+      document.getElementById('sos-modal-nrp').textContent = `${appState.soldier.nrp} • ${appState.soldier.bloodType}`;
+      document.getElementById('sos-modal').classList.remove('hidden');
+      document.getElementById('sos-status-box').classList.add('hidden');
+      lucide.createIcons();
+    }
+
+    function closeSOSModal() {
+      document.getElementById('sos-modal').classList.add('hidden');
+    }
+
+    function triggerSOSAlert() {
+      document.getElementById('sos-status-box').classList.remove('hidden');
+      document.getElementById('sos-badge').classList.remove('hidden');
+
+      const now = new Date();
+      const timeStr = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')} WIB`;
+
+      appState.sosLogs.unshift({
+        name: appState.soldier.name,
+        nrp: appState.soldier.nrp,
+        bloodType: appState.soldier.bloodType,
+        time: timeStr,
+        location: '-6.9175° S, 107.6191° E (IGD Rumkit Tk. II)'
+      });
+
+      showToast('DARURAT: Sinyal SOS dikirim ke Pusat Komando Rumkit TNI!');
+      lucide.createIcons();
+    }
+
+    // Toast Notification Helper
+    let toastTimeout;
+    function showToast(msg) {
+      const toastEl = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      toastEl.classList.remove('hidden');
+      clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toastEl.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Initialize App on Window Load
+    window.onload = function() {
+      lucide.createIcons();
+    };
+  </script>
+</body>
+</html>
